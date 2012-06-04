@@ -25,6 +25,7 @@ class Pastebin(callbacks.Plugin):
 
         if api_key == '':
             irc.reply('Pastebin API key must be set. See plugins.pastebinAPIkey value.')
+            return
 
         api_url = 'http://pastebin.com/api/api_post.php'
 
@@ -48,6 +49,7 @@ class Pastebin(callbacks.Plugin):
         expiredate_map = {'never': 'N', '10min': '10M', '1hour': '1H', '1day': '1D', '1month': '1M'}
         expiredate = expiredate_map[expiredate]
 
+        # post values
         values = {'api_paste_code': text,
                   'api_paste_name': pastename,
                   'api_paste_format':'text',
@@ -61,6 +63,8 @@ class Pastebin(callbacks.Plugin):
         req = urllib2.Request(api_url, data)
         response = urllib2.urlopen(req)
         the_page = response.read()
+
+        # print return data or url
         irc.reply(the_page)
 
     pastebin = wrap(pastebin, [getopts({'visibility': ('literal',
