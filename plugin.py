@@ -8,13 +8,17 @@ import os
 import urllib, urllib2
 from time import gmtime, strftime
 
+# documentation from: http://pastebin.com/api
+
 class Pastebin(callbacks.Plugin):
     """This plugin contains a command to upload text to pastebin.com."""
     threaded = True
 
     def pastebin(self, irc, msg, args, optlist, text):
-        """[--visibility public|unlisted|private] [--pastename name] <text>
-        post <text> to pastebin.com. Default visibility is unlisted. Name the paste using --pastename name.
+        """[--visibility public|unlisted|private] [--pastename name] [--expire never|10min|1hour|1day|1month] <text>
+        post <text> to pastebin.com. 
+        Default visibility is unlisted. Default expiration is never.
+        Name the paste using --pastename name.
         """
 
         api_key = self.registryValue('pastebinAPIkey')
@@ -25,34 +29,30 @@ class Pastebin(callbacks.Plugin):
         api_url = 'http://pastebin.com/api/api_post.php'
 
         # default args.
-        visibility = self.registryValue('Visibility').lower()
+        visibility = self.registryValue('visibility').lower()
+        expiredate = self.registryValue('expire').lower()
         pastename = msg.nick + "@" + msg.args[0] + "@" + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
 
+        # input options
         for (key, value) in optlist:
             if key == 'visibility':
                 visibility = value
             if key == 'pastename':
                 pastename = value
+            if key == 'expire':
+                expire = value
         
+        # map visibility and expire to proper values via key
         visibility_map = {'public': '0', 'unlisted': '1', 'private': '2'}
         visibility = visibility_map[visibility]
-
-        #expiredate_map = {'never': '
-        #expiredate = expiredate_map[expiredate]
-        #valid_paste_expire_dates = ('N', '10M', '1H', '1D', '1M')
-
-        #Possible API responses:
-        # Bad API request
-        # invalid api_dev_key Bad API request
-        # invalid login Bad API request
-        # account not active Bad API request
-        # invalid POST parameters
+        expiredate_map = {'never': 'N', '10min': '10M', '1hour': '1H', '1day': '1D', '1month': '1M'}
+        expiredate = expiredate_map[expiredate]
 
         values = {'api_paste_code': text,
                   'api_paste_name': pastename,
                   'api_paste_format':'text',
                   'api_paste_private': visibility,
-                  'api_paste_expire_date': '1M',
+                  'api_paste_expire_date': expiredate,
                   'api_option': 'paste',
                   'api_dev_key': api_key
                   }
@@ -67,7 +67,13 @@ class Pastebin(callbacks.Plugin):
                                                         ('public', 
                                                         'unlisted', 
                                                         'private')),
-                                         'pastename': ('something')
+                                         'pastename': ('something'),
+                                         'expire': ('literal',
+                                                    ('never',
+                                                    '10min',
+                                                    '1hour',
+                                                    '1day',
+                                                    '1month'))
                                                         }), ('text')])
 
 Class = Pastebin
