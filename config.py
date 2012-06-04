@@ -12,5 +12,6 @@ def configure(advanced):
 Pastebin = conf.registerPlugin('Pastebin')
 
 conf.registerGlobalValue(Pastebin, 'pastebinAPIkey', registry.String('', ("""Your pastebin.com API key."""), private=True))
+conf.registerGlobalValue(Pastebin, 'Visibility', registry.String('Unlisted', ("""Paste visibility. Default unlisted. Must be one of the following: Public, Unlisted, Private""")))
 
 # vim:set shiftwidth=4 tabstop=4 expandtab textwidth=200:
